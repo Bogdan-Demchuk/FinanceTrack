@@ -24,4 +24,9 @@ public class TransactionService {
     public void add(Transaction transaction) {
         transactions.add(transaction);
     }
+    public double getBalance() {
+        return transactions.stream()
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+    }
 }

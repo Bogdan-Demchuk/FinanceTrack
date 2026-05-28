@@ -24,6 +24,8 @@
 
 <h1>💰 FinTrack</h1>
 
+<h2 id="balance">Balance: 0</h2>
+
 <h3>Add transaction</h3>
 
 <input id="title" placeholder="Title">
@@ -36,50 +38,7 @@
 <h3>Transactions</h3>
 <div id="list"></div>
 
-<script>
-    const API = "/api/transactions";
-
-    async function loadTransactions() {
-        const res = await fetch(API);
-        const data = await res.json();
-
-        const list = document.getElementById("list");
-        list.innerHTML = "";
-
-        data.forEach(t => {
-            list.innerHTML += `
-                <div class="card">
-                    <b>${t.title}</b><br>
-                    💵 ${t.amount}<br>
-                    🏷 ${t.category}
-                </div>
-            `;
-        });
-    }
-
-    async function addTransaction() {
-        const title = document.getElementById("title").value;
-        const amount = document.getElementById("amount").value;
-        const category = document.getElementById("category").value;
-
-        await fetch(API, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                title: title,
-                amount: amount,
-                category: category,
-                date: new Date().toISOString().split("T")[0]
-            })
-        });
-
-        loadTransactions();
-    }
-
-    loadTransactions();
-</script>
+<script src="index.js"></script>
 
 </body>
 </html>

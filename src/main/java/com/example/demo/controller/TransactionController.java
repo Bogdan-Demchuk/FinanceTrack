@@ -25,4 +25,8 @@ public class TransactionController {
     public void add(@RequestBody Transaction transaction) {
         service.add(transaction);
     }
+    @GetMapping("/balance")
+    public double getBalance() {
+        return service.getBalance();
+    }
 }
