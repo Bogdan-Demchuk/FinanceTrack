@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>FinTrack</title>
+
     <style>
         body {
             font-family: Arial;
             max-width: 800px;
             margin: 40px auto;
         }
+
         input, button {
             margin: 5px;
             padding: 8px;
         }
+
         .card {
             border: 1px solid #ddd;
             padding: 10px;
@@ -25,17 +28,22 @@
 <h1>💰 FinTrack</h1>
 
 <h2 id="balance">Balance: 0</h2>
+<h3 id="income">Income: 0</h3>
+<h3 id="expense">Expense: 0</h3>
 
 <h3>Add transaction</h3>
 
 <input id="title" placeholder="Title">
 <input id="amount" placeholder="Amount">
+<input id="type" placeholder="INCOME or EXPENSE">
 <input id="category" placeholder="Category">
+
 <button onclick="addTransaction()">Add</button>
 
 <hr>
 
 <h3>Transactions</h3>
+
 <div id="list"></div>
 
 <script src="index.js"></script>
