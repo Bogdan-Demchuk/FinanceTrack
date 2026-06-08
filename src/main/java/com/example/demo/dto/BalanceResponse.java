@@ -1,26 +1,30 @@
 package com.example.demo.dto;
 
+import java.math.BigDecimal;
+
 public class BalanceResponse {
 
-    private double balance;
-    private double income;
-    private double expense;
+    private BigDecimal balance;
+    private BigDecimal income;
+    private BigDecimal expense;
 
-    public BalanceResponse(double balance, double income, double expense) {
-        this.balance = balance;
+    public BalanceResponse(BigDecimal income,
+                           BigDecimal expense,
+                           BigDecimal balance) {
         this.income = income;
         this.expense = expense;
+        this.balance = balance;
     }
 
-    public double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public double getIncome() {
+    public BigDecimal getIncome() {
         return income;
     }
 
-    public double getExpense() {
+    public BigDecimal getExpense() {
         return expense;
     }
 }

@@ -1,0 +1,172 @@
+/* ====== BASE ====== */
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    padding: 0;
+}
+
+/* контейнер */
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+/* ====== HEADER ====== */
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+/* ====== STATS ====== */
+.stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.stat {
+    flex: 1;
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    font-weight: bold;
+}
+
+#balance {
+    color: #2ecc71;
+}
+
+#income {
+    color: #27ae60;
+}
+
+#expense {
+    color: #e74c3c;
+}
+
+/* ====== FORM ====== */
+.form {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+input, select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    flex: 1;
+    min-width: 150px;
+}
+
+button {
+    padding: 10px 15px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+/* ====== TRANSACTIONS ====== */
+.card {
+    background: white;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+/* левая часть */
+.card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 200px;
+}
+
+/* заголовок */
+.card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* детали */
+.card-meta {
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+/* кнопки */
+.actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.actions button {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* delete */
+.actions .delete {
+    background: #e74c3c;
+    color: white;
+}
+
+/* edit */
+.actions .edit {
+    background: #f39c12;
+    color: white;
+}
+
+.card b {
+    color: #2c3e50;
+}
+
+.actions button {
+    margin-left: 5px;
+    background: #e74c3c;
+}
+
+.actions button.edit {
+    background: #f39c12;
+}
+.chart-container {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+}

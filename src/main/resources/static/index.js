@@ -1,5 +1,5 @@
 const API = "/api/transactions";
-
+let chart;
 // Загрузка всех транзакций
 async function loadTransactions() {
     const res = await fetch(API);
@@ -10,26 +10,30 @@ async function loadTransactions() {
 
     data.forEach(t => {
         list.innerHTML += `
-            <div class="card">
-                <b>${t.title}</b><br>
+             <div class="card">
 
-                💵 Amount: ${t.amount}<br>
+                 <div class="card-info">
+                     <div class="card-title">${t.title}</div>
 
-                📌 Type: ${t.type}<br>
+                     <div class="card-meta">
+                         💵 ${t.amount} ${t.type} ${t.category}
+                     </div>
+                 </div>
 
-                🏷 Category: ${t.category}<br>
+                 <div class="actions">
+                     <button class="delete" onclick="deleteTransaction(${t.id})">
+                         Delete
+                     </button>
 
-                <button onclick="deleteTransaction(${t.id})">
-                    Delete
-                </button>
+                     <button class="edit" onclick="editTransaction(${t.id})">
+                         Edit
+                     </button>
+                 </div>
 
-                <button onclick="editTransaction(${t.id})">
-                    Edit
-                </button>
-            </div>
-        `;
+             </div>
+         `;
     });
-
+    updateChart(data);
     loadBalance();
 }
 
@@ -53,7 +57,7 @@ async function addTransaction() {
 
         body: JSON.stringify({
             title: title,
-            amount: amount,
+            amount: parseFloat(amount),
             type: type,
             category: category,
             date: new Date().toISOString().split("T")[0]
@@ -78,7 +82,45 @@ async function deleteTransaction(id) {
 
     loadTransactions();
 }
+function updateChart(data) {
 
+    const income = data
+        .filter(t => t.type === "INCOME")
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+
+    const expense = data
+        .filter(t => t.type === "EXPENSE")
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+
+    const ctx = document.getElementById("chart").getContext("2d");
+
+    if (chart) {
+        chart.destroy();
+    }
+
+    chart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: ["💰 Income", "💸 Expense"],
+            datasets: [{
+                data: [income, expense],
+                backgroundColor: ["#2ecc71", "#e74c3c"]
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    labels: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
 // Редактирование
 async function editTransaction(id) {
 
@@ -100,7 +142,7 @@ async function editTransaction(id) {
 
         body: JSON.stringify({
             title: title,
-            amount: amount,
+            amount: parseFloat(amount),
             type: type,
             category: category
         })

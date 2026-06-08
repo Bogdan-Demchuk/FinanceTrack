@@ -2,6 +2,8 @@ package com.example.demo.validation;
 
 import com.example.demo.model.Transaction;
 
+import java.math.BigDecimal;
+
 public class TransactionValidator {
 
     public static void validate(Transaction t) {
@@ -14,7 +16,7 @@ public class TransactionValidator {
             );
         }
 
-        if (t.getAmount() <= 0) {
+        if (t.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
 
             throw new IllegalArgumentException(
                     "Amount must be greater than 0"

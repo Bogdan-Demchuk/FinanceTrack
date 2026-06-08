@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.dto.BalanceResponse;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class StatisticsService {
 
@@ -14,12 +16,11 @@ public class StatisticsService {
 
     public BalanceResponse getStatistics() {
 
-        double income = transactionService.getIncome();
+        BigDecimal income = transactionService.getIncome();
+        BigDecimal expense = transactionService.getExpense();
 
-        double expense = transactionService.getExpense();
+        BigDecimal balance = income.subtract(expense);
 
-        double balance = income - expense;
-
-        return new BalanceResponse(balance, income, expense);
+        return new BalanceResponse(income, expense, balance);
     }
 }

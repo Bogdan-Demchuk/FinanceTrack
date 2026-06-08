@@ -1,45 +1,49 @@
 package com.example.demo.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class Transaction {
 
     private Long id;
+    private Long userId;
     private String title;
-    private double amount;
+    private BigDecimal amount;
 
-    // INCOME / EXPENSE
-    private String type;
+    private TransactionType type;
+    private Category category;
 
-    private String category;
     private LocalDate date;
 
-    // 👇 ПУСТОЙ конструктор для Jackson
     public Transaction() {
     }
 
     public Transaction(Long id,
                        String title,
-                       double amount,
-                       String type,
-                       String category,
-                       LocalDate date) {
-
+                       BigDecimal amount,
+                       TransactionType type,
+                       Category category,
+                       LocalDate date,
+                       Long userId) {
         this.id = id;
+        this.userId = userId;
         this.title = title;
         this.amount = amount;
         this.type = type;
         this.category = category;
         this.date = date;
     }
-
-    // getters + setters
-
     public Long getId() {
         return id;
     }
+    public Long getUserId() {
+        return userId;
+    }
 
     public void setId(Long id) {
+        this.id = id;
+    }
+    public void setUserId(Long userId) {
         this.id = id;
     }
 
@@ -51,27 +55,27 @@ public class Transaction {
         this.title = title;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
-    public String getType() {
+    public TransactionType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(TransactionType type) {
         this.type = type;
     }
 
-    public String getCategory() {
+    public Category getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 
