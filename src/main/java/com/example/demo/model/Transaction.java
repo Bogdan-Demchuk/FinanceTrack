@@ -44,8 +44,9 @@ public class Transaction {
         this.id = id;
     }
     public void setUserId(Long userId) {
-        this.id = id;
+        this.userId = userId;
     }
+
 
     public String getTitle() {
         return title;

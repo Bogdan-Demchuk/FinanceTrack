@@ -119,4 +119,47 @@ public class TransactionService {
                 .filter(t -> t.getCategory() == category)
                 .toList();
     }
+    public List<Transaction> filter(
+            String title,
+            Category category,
+            TransactionType type,
+            BigDecimal minAmount,
+            BigDecimal maxAmount,
+            LocalDate from,
+            LocalDate to
+    ) {
+        return transactions.stream()
+                .filter(t ->
+                        title == null ||
+                                title.isBlank() ||
+                                t.getTitle().toLowerCase()
+                                        .contains(title.toLowerCase())
+                )
+                .filter(t ->
+                        category == null ||
+                                t.getCategory() == category
+                )
+                .filter(t ->
+                        type == null ||
+                                t.getType() == type
+                )
+                .filter(t ->
+                        minAmount == null ||
+                                t.getAmount().compareTo(minAmount) >= 0
+                )
+                .filter(t ->
+                        maxAmount == null ||
+                                t.getAmount().compareTo(maxAmount) <= 0
+                )
+                .filter(t ->
+                        from == null ||
+                                !t.getDate().isBefore(from)
+                )
+                .filter(t ->
+                        to == null ||
+                                !t.getDate().isAfter(to)
+                )
+                .toList();
+    }
+
 }

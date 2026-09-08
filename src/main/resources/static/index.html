@@ -2,56 +2,288 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>FinTrack</title>
 
     <link rel="stylesheet" href="style.css">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
 <div class="container">
 
-    <h1>FinTrack</h1>
+    <!-- HEADER -->
+    <div class="header">
+        <div>
+            <h1>💰 FinTrack</h1>
+            <p>Personal finance tracker</p>
+        </div>
+    </div>
 
-    <!-- STATS -->
+
+    <!-- STATISTICS -->
     <div class="stats">
-        <div class="stat" id="balance">Balance: 0</div>
-        <div class="stat" id="income">Income: 0</div>
-        <div class="stat" id="expense">Expense: 0</div>
+
+        <div class="stat balance-card">
+            <span class="stat-label">Balance</span>
+            <span class="stat-value" id="balance">0.00</span>
+        </div>
+
+        <div class="stat income-card">
+            <span class="stat-label">Income</span>
+            <span class="stat-value" id="income">0.00</span>
+        </div>
+
+        <div class="stat expense-card">
+            <span class="stat-label">Expense</span>
+            <span class="stat-value" id="expense">0.00</span>
+        </div>
+
     </div>
 
-    <!-- FORM -->
-    <div class="form">
-        <input id="title" placeholder="Title">
-        <input id="amount" placeholder="Amount">
 
-        <select id="type">
-            <option value="INCOME">INCOME</option>
-            <option value="EXPENSE">EXPENSE</option>
-        </select>
+    <!-- ADD TRANSACTION -->
+    <div class="panel">
 
-        <select id="category">
-            <option value="FOOD">FOOD</option>
-            <option value="TRANSPORT">TRANSPORT</option>
-            <option value="ENTERTAINMENT">ENTERTAINMENT</option>
-            <option value="WORK">WORK</option>
-            <option value="HEALTH">HEALTH</option>
-            <option value="SHOPPING">SHOPPING</option>
-            <option value="OTHER">OTHER</option>
-        </select>
+        <h2>Add transaction</h2>
 
-        <button onclick="addTransaction()">Add</button>
+        <div class="form">
+
+            <input
+                    id="title"
+                    type="text"
+                    placeholder="Transaction title"
+            >
+
+            <input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Amount"
+            >
+
+            <select id="type">
+
+                <option value="EXPENSE">EXPENSE</option>
+                <option value="INCOME">INCOME</option>
+
+            </select>
+
+            <select id="category">
+
+                <option value="FOOD">FOOD</option>
+                <option value="TRANSPORT">TRANSPORT</option>
+                <option value="ENTERTAINMENT">ENTERTAINMENT</option>
+                <option value="WORK">WORK</option>
+                <option value="HEALTH">HEALTH</option>
+                <option value="SHOPPING">SHOPPING</option>
+                <option value="OTHER">OTHER</option>
+
+            </select>
+
+            <button class="primary-button" onclick="addTransaction()">
+                + Add
+            </button>
+
+        </div>
+
     </div>
 
-    <!-- LIST -->
-    <h3>Transactions</h3>
-    <div id="list"></div>
+
+    <!-- FILTERS -->
+    <div class="panel">
+
+        <div class="filter-header">
+
+            <div>
+                <h2>🔎 Find transactions</h2>
+                <p>Filter your transactions</p>
+            </div>
+
+            <button
+                    class="reset-button"
+                    onclick="resetFilters()"
+            >
+                ↻ Reset
+            </button>
+
+        </div>
 
 
-    <div class="chart-container">
-        <canvas id="chart"></canvas>
+        <div class="filters">
+
+            <!-- SEARCH -->
+            <div class="filter-group">
+
+                <label for="filterTitle">
+                    Search
+                </label>
+
+                <input
+                        id="filterTitle"
+                        type="text"
+                        placeholder="Search by title..."
+                >
+
+            </div>
+
+
+            <!-- CATEGORY -->
+            <div class="filter-group">
+
+                <label for="filterCategory">
+                    Category
+                </label>
+
+                <select id="filterCategory">
+
+                    <option value="">All categories</option>
+
+                    <option value="FOOD">Food</option>
+                    <option value="TRANSPORT">Transport</option>
+                    <option value="ENTERTAINMENT">Entertainment</option>
+                    <option value="WORK">Work</option>
+                    <option value="HEALTH">Health</option>
+                    <option value="SHOPPING">Shopping</option>
+                    <option value="OTHER">Other</option>
+
+                </select>
+
+            </div>
+
+
+            <!-- TYPE -->
+            <div class="filter-group">
+
+                <label for="filterType">
+                    Type
+                </label>
+
+                <select id="filterType">
+
+                    <option value="">All types</option>
+
+                    <option value="INCOME">Income</option>
+                    <option value="EXPENSE">Expense</option>
+
+                </select>
+
+            </div>
+
+
+            <!-- MIN AMOUNT -->
+            <div class="filter-group">
+
+                <label for="minAmount">
+                    Min amount
+                </label>
+
+                <input
+                        id="minAmount"
+                        type="number"
+                        step="0.01"
+                        placeholder="0"
+                >
+
+            </div>
+
+
+            <!-- MAX AMOUNT -->
+            <div class="filter-group">
+
+                <label for="maxAmount">
+                    Max amount
+                </label>
+
+                <input
+                        id="maxAmount"
+                        type="number"
+                        step="0.01"
+                        placeholder="∞"
+                >
+
+            </div>
+
+
+            <!-- FROM DATE -->
+            <div class="filter-group">
+
+                <label for="fromDate">
+                    From
+                </label>
+
+                <input
+                        id="fromDate"
+                        type="date"
+                >
+
+            </div>
+
+
+            <!-- TO DATE -->
+            <div class="filter-group">
+
+                <label for="toDate">
+                    To
+                </label>
+
+                <input
+                        id="toDate"
+                        type="date"
+                >
+
+            </div>
+
+        </div>
+
+
+        <button
+                class="filter-button"
+                onclick="applyFilters()"
+        >
+            🔍 Apply filters
+        </button>
+
     </div>
+
+
+    <!-- TRANSACTIONS -->
+    <div class="transactions-section">
+
+        <div class="section-header">
+
+            <h2>Transactions</h2>
+
+            <span id="transactionCount">
+                0 transactions
+            </span>
+
+        </div>
+
+        <div id="list"></div>
+
+    </div>
+
+
+    <!-- CHART -->
+    <div class="panel chart-panel">
+
+        <h2>📊 Overview</h2>
+
+        <div class="chart-container">
+
+            <canvas id="chart"></canvas>
+
+        </div>
+
+    </div>
+
 </div>
+
 
 <script src="index.js"></script>
 

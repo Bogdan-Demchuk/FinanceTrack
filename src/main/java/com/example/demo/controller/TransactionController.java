@@ -2,10 +2,12 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Category;
 import com.example.demo.model.Transaction;
+import com.example.demo.model.TransactionType;
 import com.example.demo.service.TransactionService;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -60,11 +62,37 @@ public class TransactionController {
 
     @GetMapping("/filter")
     public List<Transaction> filter(
-            @RequestParam(required = false) Category category
+
+            @RequestParam(required = false)
+            String title,
+
+            @RequestParam(required = false)
+            Category category,
+
+            @RequestParam(required = false)
+            TransactionType type,
+
+            @RequestParam(required = false)
+            BigDecimal minAmount,
+
+            @RequestParam(required = false)
+            BigDecimal maxAmount,
+
+            @RequestParam(required = false)
+            LocalDate from,
+
+            @RequestParam(required = false)
+            LocalDate to
     ) {
-        if (category == null) {
-            return service.getAll();
-        }
-        return service.filterByCategory(category);
+        return service.filter(
+                title,
+                category,
+                type,
+                minAmount,
+                maxAmount,
+                from,
+                to
+        );
     }
+
 }
