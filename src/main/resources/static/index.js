@@ -1,78 +1,462 @@
 const API = "/api/transactions";
+const STATISTICS_API = "/api/statistics";
 
-let chart;
+let categoryChart;
 
 
-// ==============================
-// LOAD TRANSACTIONS
-// ==============================
+// ========================================
+// INITIALIZATION
+// ========================================
 
-async function loadTransactions(url = API) {
+document.addEventListener("DOMContentLoaded", () => {
+
+    const monthInput =
+        document.getElementById("month");
+
+    const now = new Date();
+
+    const month =
+        String(now.getMonth() + 1).padStart(2, "0");
+
+    monthInput.value =
+        `${now.getFullYear()}-${month}`;
+
+    monthInput.addEventListener(
+        "change",
+        loadDashboard
+    );
+
+    loadDashboard();
+});
+
+
+// ========================================
+// DATE RANGE
+// ========================================
+
+function getSelectedMonthRange() {
+
+    const value =
+        document.getElementById("month").value;
+
+    if (!value) {
+        return null;
+    }
+
+    const [year, month] =
+        value.split("-").map(Number);
+
+    const from =
+        `${year}-${String(month).padStart(2, "0")}-01`;
+
+    const lastDay =
+        new Date(year, month, 0).getDate();
+
+    const to =
+        `${year}-${String(month).padStart(2, "0")}-${lastDay}`;
+
+    return {
+        from,
+        to
+    };
+}
+
+
+// ========================================
+// DASHBOARD
+// ========================================
+
+async function loadDashboard() {
+
+    const range =
+        getSelectedMonthRange();
+
+    if (!range) {
+        return;
+    }
 
     try {
 
-        const res = await fetch(url);
+        const response =
+            await fetch(
+                `${STATISTICS_API}/dashboard?` +
+                `from=${range.from}&to=${range.to}`
+            );
 
-        if (!res.ok) {
-            throw new Error("Failed to load transactions");
+        if (!response.ok) {
+            throw new Error(
+                "Failed to load dashboard"
+            );
         }
 
-        const data = await res.json();
+        const data =
+            await response.json();
 
-        renderTransactions(data);
+        updateStatistics(data);
 
-        updateChart(data);
+        updateCategoryChart(
+            data.categories
+        );
 
-        updateTransactionCount(data);
+        updateInsights(data);
 
-        loadBalance();
+        await loadTransactions();
 
     } catch (error) {
 
         console.error(error);
 
-        document.getElementById("list").innerHTML = `
-            <div class="error">
-                ❌ Failed to load transactions
-            </div>
-        `;
     }
 }
 
 
-// ==============================
-// RENDER TRANSACTIONS
-// ==============================
+// ========================================
+// STATISTICS
+// ========================================
 
-function renderTransactions(data) {
+function updateStatistics(data) {
 
-    const list = document.getElementById("list");
+    document.getElementById("balance")
+        .innerText =
+        formatMoney(data.balance);
 
-    list.innerHTML = "";
+    document.getElementById("income")
+        .innerText =
+        formatMoney(data.income);
 
-    if (data.length === 0) {
+    document.getElementById("expense")
+        .innerText =
+        formatMoney(data.expense);
 
-        list.innerHTML = `
-            <div class="empty">
-                <div class="empty-icon">📭</div>
-                <h3>No transactions found</h3>
-                <p>Try changing your filters.</p>
-            </div>
-        `;
+    document.getElementById("savings")
+        .innerText =
+        formatMoney(data.savings);
+
+    document.getElementById("savingsRate")
+        .innerText =
+        `${Number(data.savingsRate).toFixed(1)}%`;
+}
+
+
+// ========================================
+// MONEY FORMAT
+// ========================================
+
+function formatMoney(value) {
+
+    return `$${Number(value).toFixed(2)}`;
+
+}
+
+
+// ========================================
+// CATEGORY CHART
+// ========================================
+
+function updateCategoryChart(categories) {
+
+    const labels =
+        categories.map(item =>
+            formatCategory(item.category)
+        );
+
+    const values =
+        categories.map(item =>
+            Number(item.amount)
+        );
+
+    const ctx =
+        document
+            .getElementById("categoryChart")
+            .getContext("2d");
+
+    if (categoryChart) {
+        categoryChart.destroy();
+    }
+
+    categoryChart =
+        new Chart(ctx, {
+
+            type: "doughnut",
+
+            data: {
+
+                labels: labels,
+
+                datasets: [{
+
+                    data: values,
+
+                    backgroundColor: [
+                        "#3498db",
+                        "#2ecc71",
+                        "#f1c40f",
+                        "#e67e22",
+                        "#9b59b6",
+                        "#1abc9c",
+                        "#e74c3c"
+                    ],
+
+                    borderWidth: 0
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+
+                        position: "bottom"
+
+                    }
+
+                }
+
+            }
+
+        });
+}
+
+
+// ========================================
+// CATEGORY NAMES
+// ========================================
+
+function formatCategory(category) {
+
+    const names = {
+
+        FOOD: "🍔 Food",
+
+        TRANSPORT: "🚗 Transport",
+
+        ENTERTAINMENT:
+            "🎮 Entertainment",
+
+        WORK: "💼 Work",
+
+        HEALTH: "❤️ Health",
+
+        SHOPPING: "🛍 Shopping",
+
+        OTHER: "📦 Other"
+
+    };
+
+    return names[category] || category;
+}
+
+
+// ========================================
+// INSIGHTS
+// ========================================
+
+function updateInsights(data) {
+
+    const container =
+        document.getElementById("insights");
+
+    container.innerHTML = "";
+
+    if (!data.categories ||
+        data.categories.length === 0) {
+
+        container.innerHTML =
+            `<p class="empty">
+                No expenses for this month.
+            </p>`;
 
         return;
     }
 
 
+    // TOP CATEGORY
+
+    const topCategory =
+        data.categories.reduce(
+            (max, item) =>
+                Number(item.amount) >
+                Number(max.amount)
+                    ? item
+                    : max
+        );
+
+
+    const categoryName =
+        formatCategory(
+            topCategory.category
+        );
+
+
+    container.innerHTML += `
+
+        <div class="insight warning">
+
+            <div class="insight-icon">
+                ⚠️
+            </div>
+
+            <div>
+
+                <strong>
+                    Biggest expense
+                </strong>
+
+                <p>
+                    ${categoryName}
+                    — ${formatMoney(topCategory.amount)}
+                </p>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    // SAVINGS RATE
+
+    const rate =
+        Number(data.savingsRate);
+
+
+    let message;
+    let icon;
+    let className;
+
+
+    if (rate >= 30) {
+
+        icon = "🟢";
+
+        message =
+            "Excellent savings rate!";
+
+        className = "success";
+
+    } else if (rate >= 15) {
+
+        icon = "🟡";
+
+        message =
+            "Your savings rate is good.";
+
+        className = "normal";
+
+    } else {
+
+        icon = "🔴";
+
+        message =
+            "Your savings rate is low.";
+
+        className = "danger";
+    }
+
+
+    container.innerHTML += `
+
+        <div class="insight ${className}">
+
+            <div class="insight-icon">
+                ${icon}
+            </div>
+
+            <div>
+
+                <strong>
+                    Savings Rate
+                </strong>
+
+                <p>
+                    ${message}
+                    ${rate.toFixed(1)}%
+                    of income saved.
+                </p>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    // POTENTIAL SAVINGS
+
+    if (topCategory.amount > 0) {
+
+        const potential =
+            Number(topCategory.amount) * 0.15;
+
+        container.innerHTML += `
+
+            <div class="insight tip">
+
+                <div class="insight-icon">
+                    💡
+                </div>
+
+                <div>
+
+                    <strong>
+                        Potential savings
+                    </strong>
+
+                    <p>
+                        Cutting
+                        ${categoryName}
+                        by 15% could save
+                        approximately
+                        ${formatMoney(potential)}
+                        this month.
+                    </p>
+
+                </div>
+
+            </div>
+
+        `;
+    }
+}
+
+
+// ========================================
+// TRANSACTIONS
+// ========================================
+
+async function loadTransactions() {
+
+    const response =
+        await fetch(API);
+
+    const data =
+        await response.json();
+
+    const list =
+        document.getElementById("list");
+
+    list.innerHTML = "";
+
+    document.getElementById(
+        "transactionCount"
+    ).innerText =
+        `${data.length} transactions`;
+
+
     data.forEach(t => {
 
-        const isIncome = t.type === "INCOME";
+        const amount =
+            Number(t.amount);
 
-        const amountClass =
-            isIncome ? "income-amount" : "expense-amount";
-
-        const sign =
-            isIncome ? "+" : "-";
+        const isIncome =
+            t.type === "INCOME";
 
 
         list.innerHTML += `
@@ -82,19 +466,16 @@ function renderTransactions(data) {
                 <div class="card-info">
 
                     <div class="card-title">
+
                         ${escapeHtml(t.title)}
+
                     </div>
 
                     <div class="card-meta">
 
-                        <span>
-                            ${getCategoryIcon(t.category)}
-                            ${t.category}
-                        </span>
-
-                        <span>
-                            📅 ${t.date}
-                        </span>
+                        ${formatCategory(t.category)}
+                        •
+                        ${t.date || ""}
 
                     </div>
 
@@ -103,24 +484,37 @@ function renderTransactions(data) {
 
                 <div class="transaction-right">
 
-                    <div class="${amountClass}">
-                        ${sign}${Number(t.amount).toFixed(2)}
+                    <div class="
+                        transaction-amount
+                        ${isIncome
+            ? "income"
+            : "expense"}
+                    ">
+
+                        ${isIncome ? "+" : "-"}
+                        ${formatMoney(amount)}
+
                     </div>
+
 
                     <div class="actions">
 
                         <button
-                                class="edit"
-                                onclick="editTransaction(${t.id})"
+                            class="delete"
+                            onclick="
+                                deleteTransaction(${t.id})
+                            "
                         >
-                            ✏️
+                            Delete
                         </button>
 
                         <button
-                                class="delete"
-                                onclick="deleteTransaction(${t.id})"
+                            class="edit"
+                            onclick="
+                                editTransaction(${t.id})
+                            "
                         >
-                            🗑️
+                            Edit
                         </button>
 
                     </div>
@@ -128,14 +522,15 @@ function renderTransactions(data) {
                 </div>
 
             </div>
+
         `;
     });
 }
 
 
-// ==============================
-// ADD TRANSACTION
-// ==============================
+// ========================================
+// ADD
+// ========================================
 
 async function addTransaction() {
 
@@ -143,7 +538,9 @@ async function addTransaction() {
         document.getElementById("title").value.trim();
 
     const amount =
-        document.getElementById("amount").value;
+        Number(
+            document.getElementById("amount").value
+        );
 
     const type =
         document.getElementById("type").value;
@@ -154,505 +551,153 @@ async function addTransaction() {
 
     if (!title) {
 
-        alert("Please enter a title.");
+        alert("Enter transaction title.");
 
         return;
     }
 
 
-    if (!amount || Number(amount) <= 0) {
+    if (!amount || amount <= 0) {
 
-        alert("Amount must be greater than 0.");
+        alert("Enter a valid amount.");
 
         return;
     }
 
 
-    try {
+    await fetch(API, {
 
-        const res = await fetch(API, {
+        method: "POST",
 
-            method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+        body: JSON.stringify({
 
-            body: JSON.stringify({
+            title,
 
-                title: title,
+            amount,
 
-                amount: Number(amount),
+            type,
 
-                type: type,
+            category,
 
-                category: category,
-
-                date: new Date()
+            date:
+                new Date()
                     .toISOString()
                     .split("T")[0]
 
-            })
+        })
 
-        });
-
-
-        if (!res.ok) {
-
-            const errorText = await res.text();
-
-            throw new Error(errorText);
-        }
+    });
 
 
-        document.getElementById("title").value = "";
+    document.getElementById("title")
+        .value = "";
 
-        document.getElementById("amount").value = "";
-
-        document.getElementById("type").value = "EXPENSE";
-
-        document.getElementById("category").value = "FOOD";
+    document.getElementById("amount")
+        .value = "";
 
 
-        loadTransactions();
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert("Failed to add transaction.");
-    }
+    await loadDashboard();
 }
 
 
-// ==============================
+// ========================================
 // DELETE
-// ==============================
+// ========================================
 
 async function deleteTransaction(id) {
 
-    const confirmed =
-        confirm("Are you sure you want to delete this transaction?");
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    try {
-
-        const res = await fetch(
-            API + "/" + id,
-            {
-                method: "DELETE"
-            }
-        );
-
-
-        if (!res.ok) {
-            throw new Error("Delete failed");
+    await fetch(
+        `${API}/${id}`,
+        {
+            method: "DELETE"
         }
+    );
 
-
-        loadTransactions();
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert("Failed to delete transaction.");
-    }
+    await loadDashboard();
 }
 
 
-// ==============================
+// ========================================
 // EDIT
-// ==============================
+// ========================================
 
 async function editTransaction(id) {
 
     const title =
         prompt("New title");
 
-
-    if (title === null) {
+    if (!title) {
         return;
     }
 
 
     const amount =
-        prompt("New amount");
+        Number(
+            prompt("New amount")
+        );
 
-
-    if (amount === null) {
+    if (!amount || amount <= 0) {
         return;
     }
 
 
     const type =
-        prompt("INCOME or EXPENSE");
-
-
-    if (type === null) {
-        return;
-    }
+        prompt(
+            "INCOME or EXPENSE"
+        );
 
 
     const category =
         prompt(
-            "Category: FOOD, TRANSPORT, ENTERTAINMENT, WORK, HEALTH, SHOPPING, OTHER"
+            "FOOD, TRANSPORT, ENTERTAINMENT, WORK, HEALTH, SHOPPING or OTHER"
         );
 
 
-    if (category === null) {
-        return;
-    }
+    await fetch(
+        `${API}/${id}`,
+        {
 
+            method: "PUT",
 
-    try {
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
 
-        const res = await fetch(
+            body: JSON.stringify({
 
-            API + "/" + id,
+                title,
 
-            {
+                amount,
 
-                method: "PUT",
+                type,
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                category
 
-                body: JSON.stringify({
-
-                    title: title,
-
-                    amount: Number(amount),
-
-                    type: type.toUpperCase(),
-
-                    category: category.toUpperCase(),
-
-                    date: new Date()
-                        .toISOString()
-                        .split("T")[0]
-
-                })
-
-            }
-        );
-
-
-        if (!res.ok) {
-
-            throw new Error("Update failed");
-        }
-
-
-        loadTransactions();
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert("Failed to update transaction.");
-    }
-}
-
-
-// ==============================
-// FILTERS
-// ==============================
-
-function applyFilters() {
-
-    const params =
-        new URLSearchParams();
-
-
-    const title =
-        document.getElementById("filterTitle").value.trim();
-
-    const category =
-        document.getElementById("filterCategory").value;
-
-    const type =
-        document.getElementById("filterType").value;
-
-    const minAmount =
-        document.getElementById("minAmount").value;
-
-    const maxAmount =
-        document.getElementById("maxAmount").value;
-
-    const from =
-        document.getElementById("fromDate").value;
-
-    const to =
-        document.getElementById("toDate").value;
-
-
-    if (title) {
-        params.append("title", title);
-    }
-
-    if (category) {
-        params.append("category", category);
-    }
-
-    if (type) {
-        params.append("type", type);
-    }
-
-    if (minAmount) {
-        params.append("minAmount", minAmount);
-    }
-
-    if (maxAmount) {
-        params.append("maxAmount", maxAmount);
-    }
-
-    if (from) {
-        params.append("from", from);
-    }
-
-    if (to) {
-        params.append("to", to);
-    }
-
-
-    const query =
-        params.toString();
-
-
-    const url =
-        query
-            ? API + "/filter?" + query
-            : API;
-
-
-    loadTransactions(url);
-}
-
-
-// ==============================
-// RESET FILTERS
-// ==============================
-
-function resetFilters() {
-
-    document.getElementById("filterTitle").value = "";
-
-    document.getElementById("filterCategory").value = "";
-
-    document.getElementById("filterType").value = "";
-
-    document.getElementById("minAmount").value = "";
-
-    document.getElementById("maxAmount").value = "";
-
-    document.getElementById("fromDate").value = "";
-
-    document.getElementById("toDate").value = "";
-
-
-    loadTransactions();
-}
-
-
-// ==============================
-// BALANCE
-// ==============================
-
-async function loadBalance() {
-
-    try {
-
-        const balance =
-            await fetch(API + "/balance")
-                .then(res => res.json());
-
-
-        const income =
-            await fetch(API + "/income")
-                .then(res => res.json());
-
-
-        const expense =
-            await fetch(API + "/expense")
-                .then(res => res.json());
-
-
-        document.getElementById("balance")
-            .innerText = Number(balance).toFixed(2);
-
-
-        document.getElementById("income")
-            .innerText = Number(income).toFixed(2);
-
-
-        document.getElementById("expense")
-            .innerText = Number(expense).toFixed(2);
-
-
-    } catch (error) {
-
-        console.error("Failed to load balance", error);
-    }
-}
-
-
-// ==============================
-// CHART
-// ==============================
-
-function updateChart(data) {
-
-    const income = data
-
-        .filter(t => t.type === "INCOME")
-
-        .reduce(
-            (sum, t) => sum + Number(t.amount),
-            0
-        );
-
-
-    const expense = data
-
-        .filter(t => t.type === "EXPENSE")
-
-        .reduce(
-            (sum, t) => sum + Number(t.amount),
-            0
-        );
-
-
-    const ctx =
-        document
-            .getElementById("chart")
-            .getContext("2d");
-
-
-    if (chart) {
-        chart.destroy();
-    }
-
-
-    chart = new Chart(ctx, {
-
-        type: "doughnut",
-
-        data: {
-
-            labels: [
-                "💰 Income",
-                "💸 Expense"
-            ],
-
-            datasets: [{
-
-                data: [
-                    income,
-                    expense
-                ],
-
-                backgroundColor: [
-                    "#22c55e",
-                    "#ef4444"
-                ],
-
-                borderWidth: 0
-
-            }]
-
-        },
-
-        options: {
-
-            responsive: true,
-
-            maintainAspectRatio: false,
-
-            plugins: {
-
-                legend: {
-
-                    position: "bottom"
-
-                }
-
-            }
+            })
 
         }
+    );
 
-    });
+
+    await loadDashboard();
 }
 
 
-// ==============================
-// COUNT
-// ==============================
-
-function updateTransactionCount(data) {
-
-    const count = data.length;
-
-    document.getElementById("transactionCount")
-        .innerText =
-        count === 1
-            ? "1 transaction"
-            : `${count} transactions`;
-}
-
-
-// ==============================
-// CATEGORY ICON
-// ==============================
-
-function getCategoryIcon(category) {
-
-    const icons = {
-
-        FOOD: "🍔",
-
-        TRANSPORT: "🚗",
-
-        ENTERTAINMENT: "🎮",
-
-        WORK: "💼",
-
-        HEALTH: "❤️",
-
-        SHOPPING: "🛍️",
-
-        OTHER: "📦"
-
-    };
-
-
-    return icons[category] || "📦";
-}
-
-
-// ==============================
+// ========================================
 // SECURITY
-// ==============================
+// ========================================
 
-function escapeHtml(value) {
+function escapeHtml(text) {
 
     const div =
         document.createElement("div");
 
-    div.textContent = value;
+    div.textContent = text;
 
     return div.innerHTML;
 }
-
-
-// ==============================
-// START
-// ==============================
-
-loadTransactions();
