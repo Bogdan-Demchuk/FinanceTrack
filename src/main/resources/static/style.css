@@ -457,3 +457,256 @@ button {
         transform: translateX(30px);
     }
 }
+/* ================================
+   MODALS
+================================ */
+
+.modal {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 10000;
+
+    background:
+            rgba(15, 23, 42, 0.55);
+
+    backdrop-filter: blur(4px);
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+
+    width: 100%;
+    max-width: 500px;
+
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 28px;
+
+    box-shadow:
+            0 20px 60px
+            rgba(0, 0, 0, 0.25);
+
+    animation:
+            modalIn 0.25s ease;
+}
+
+.modal-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+}
+
+.modal-header h2 {
+
+    margin: 0;
+
+    font-size: 22px;
+
+    color: #2c3e50;
+}
+
+.modal-close {
+
+    width: 36px;
+    height: 36px;
+
+    padding: 0;
+
+    border-radius: 50%;
+
+    background: #f1f2f6;
+
+    color: #2c3e50;
+
+    font-size: 24px;
+
+    line-height: 36px;
+
+    transition:
+            background 0.2s,
+            transform 0.2s;
+}
+
+.modal-close:hover {
+
+    background: #e5e7eb;
+
+    transform: rotate(90deg);
+}
+
+
+/* MODAL FORM */
+
+.modal-form {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.modal-form label {
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #7f8c8d;
+
+    margin-top: 8px;
+}
+
+.modal-form input,
+.modal-form select {
+
+    width: 100%;
+
+    padding: 12px 13px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+            border-color 0.2s,
+            box-shadow 0.2s;
+}
+
+.modal-form input:focus,
+.modal-form select:focus {
+
+    border-color: #3498db;
+
+    box-shadow:
+            0 0 0 3px
+            rgba(52, 152, 219, 0.12);
+}
+
+
+/* DELETE MESSAGE */
+
+#deleteMessage {
+
+    margin: 5px 0 0;
+
+    color: #7f8c8d;
+
+    font-size: 15px;
+
+    line-height: 1.6;
+}
+
+
+/* MODAL ACTIONS */
+
+.modal-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 25px;
+}
+
+.modal-actions button {
+
+    padding: 11px 18px;
+
+    font-size: 14px;
+
+    transition:
+            background 0.2s,
+            transform 0.15s;
+}
+
+.modal-actions button:hover {
+
+    transform: translateY(-1px);
+}
+
+
+/* CANCEL */
+
+.cancel-button {
+
+    background: #95a5a6;
+}
+
+.cancel-button:hover {
+
+    background: #7f8c8d;
+}
+
+
+/* SAVE */
+
+.save-button {
+
+    background: #3498db;
+}
+
+.save-button:hover {
+
+    background: #2980b9;
+}
+
+
+/* DELETE */
+
+.delete-button {
+
+    background: #e74c3c;
+}
+
+.delete-button:hover {
+
+    background: #c0392b;
+}
+
+
+/* ANIMATION */
+
+@keyframes modalIn {
+
+    from {
+        opacity: 0;
+
+        transform:
+                translateY(-15px)
+                scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+                translateY(0)
+                scale(1);
+    }
+}

@@ -2,6 +2,8 @@ const API = "/api/transactions";
 const STATISTICS_API = "/api/statistics";
 
 let categoryChart;
+let currentTransactions = [];
+let deletingTransactionId = null;
 
 function showNotification(message, type = "info") {
 
@@ -172,6 +174,23 @@ function formatMoney(value) {
 
     return `$${Number(value).toFixed(2)}`;
 
+}
+function getLocalDate() {
+
+    const now = new Date();
+
+    const year =
+        now.getFullYear();
+
+    const month =
+        String(now.getMonth() + 1)
+            .padStart(2, "0");
+
+    const day =
+        String(now.getDate())
+            .padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
 }
 
 
@@ -464,6 +483,7 @@ async function loadTransactions() {
 
     const data =
         await response.json();
+    currentTransactions = data;
 
     const list =
         document.getElementById("list");
@@ -667,13 +687,54 @@ async function addTransaction() {
 // DELETE
 // ========================================
 
-async function deleteTransaction(id) {
+function deleteTransaction(id) {
+
+    const transaction =
+        currentTransactions.find(
+            t => t.id === id
+        );
+
+    if (!transaction) {
+
+        showNotification(
+            "Transaction not found.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    deletingTransactionId = id;
+
+
+    document.getElementById("deleteMessage")
+        .innerText =
+        `Are you sure you want to delete "${transaction.title}"?`;
+
+
+    document.getElementById("deleteModal")
+        .classList.add("active");
+}
+function closeDeleteModal() {
+
+    document.getElementById("deleteModal")
+        .classList.remove("active");
+
+    deletingTransactionId = null;
+}
+async function confirmDeleteTransaction() {
+
+    if (deletingTransactionId === null) {
+        return;
+    }
+
 
     try {
 
         const response =
             await fetch(
-                `${API}/${id}`,
+                `${API}/${deletingTransactionId}`,
                 {
                     method: "DELETE"
                 }
@@ -695,6 +756,9 @@ async function deleteTransaction(id) {
         }
 
 
+        closeDeleteModal();
+
+
         showNotification(
             "Transaction deleted successfully!",
             "success"
@@ -703,9 +767,12 @@ async function deleteTransaction(id) {
 
         await loadDashboard();
 
+
     } catch (error) {
 
         console.error(error);
+
+        closeDeleteModal();
 
         showNotification(
             "Server error. Please try again.",
@@ -716,30 +783,98 @@ async function deleteTransaction(id) {
 
 
 
-// ========================================
+
+/// ========================================
 // EDIT
 // ========================================
 
-async function editTransaction(id) {
+let editingTransactionId = null;
 
-    const title =
-        prompt("New title");
 
-    if (!title) {
+function editTransaction(id) {
+
+    const transaction =
+        currentTransactions.find(
+            t => t.id === id
+        );
+
+    if (!transaction) {
 
         showNotification(
-            "Title cannot be empty.",
-            "warning"
+            "Transaction not found.",
+            "error"
         );
 
         return;
     }
 
 
+    editingTransactionId = id;
+
+
+    document.getElementById("editTitle")
+        .value = transaction.title;
+
+    document.getElementById("editAmount")
+        .value = transaction.amount;
+
+    document.getElementById("editDate")
+        .value = transaction.date;
+
+    document.getElementById("editType")
+        .value = transaction.type;
+
+    document.getElementById("editCategory")
+        .value = transaction.category;
+
+
+    document.getElementById("editModal")
+        .classList.add("active");
+}
+
+
+async function saveEditedTransaction() {
+
+    if (editingTransactionId === null) {
+        return;
+    }
+
+
+    const title =
+        document.getElementById("editTitle")
+            .value
+            .trim();
+
     const amount =
         Number(
-            prompt("New amount")
+            document.getElementById("editAmount")
+                .value
         );
+
+    const type =
+        document.getElementById("editType")
+            .value;
+
+    const category =
+        document.getElementById("editCategory")
+            .value;
+
+    const date =
+        document.getElementById("editDate")
+            .value;
+
+
+
+    if (!title) {
+
+        showNotification(
+            "Please enter transaction title.",
+            "warning"
+        );
+
+        return;
+    }
+
 
     if (!amount || amount <= 0) {
 
@@ -752,23 +887,11 @@ async function editTransaction(id) {
     }
 
 
-    const type =
-        prompt(
-            "INCOME or EXPENSE"
-        );
-
-
-    const category =
-        prompt(
-            "FOOD, TRANSPORT, ENTERTAINMENT, WORK, HEALTH, SHOPPING or OTHER"
-        );
-
-
     try {
 
         const response =
             await fetch(
-                `${API}/${id}`,
+                `${API}/${editingTransactionId}`,
                 {
 
                     method: "PUT",
@@ -783,9 +906,11 @@ async function editTransaction(id) {
                         title,
                         amount,
                         type,
-                        category
+                        category,
+                        date
 
                     })
+
 
                 }
             );
@@ -806,6 +931,9 @@ async function editTransaction(id) {
         }
 
 
+        closeEditModal();
+
+
         showNotification(
             "Transaction updated successfully!",
             "success"
@@ -824,6 +952,64 @@ async function editTransaction(id) {
         );
     }
 }
+
+
+function closeEditModal() {
+
+    document.getElementById("editModal")
+        .classList.remove("active");
+
+    editingTransactionId = null;
+}
+
+// ========================================
+// MODAL BACKGROUND CLOSE
+// ========================================
+
+document.addEventListener("click", (event) => {
+
+    if (event.target.id === "editModal") {
+        closeEditModal();
+    }
+
+    if (event.target.id === "deleteModal") {
+        closeDeleteModal();
+    }
+
+});
+// ========================================
+// ESCAPE KEY
+// ========================================
+
+document.addEventListener("keydown", (event) => {
+
+    if (event.key !== "Escape") {
+        return;
+    }
+
+
+    const editModal =
+        document.getElementById("editModal");
+
+    const deleteModal =
+        document.getElementById("deleteModal");
+
+
+    if (editModal.classList.contains("active")) {
+
+        closeEditModal();
+
+        return;
+    }
+
+
+    if (deleteModal.classList.contains("active")) {
+
+        closeDeleteModal();
+
+    }
+
+});
 
 
 
