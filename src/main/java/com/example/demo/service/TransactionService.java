@@ -22,10 +22,6 @@ public class TransactionService {
 
     public TransactionService() {
 
-        // =========================
-        // INCOME
-        // =========================
-
         transactions.add(
                 new Transaction(
                         idCounter++,
@@ -265,13 +261,21 @@ public class TransactionService {
         transactions.add(t);
     }
 
-    // ===== DELETE =====
     public void delete(Long id) {
-        transactions.removeIf(t -> t.getId().equals(id));
+
+        boolean removed = transactions.removeIf(
+                t -> t.getId().equals(id)
+        );
+
+        if (!removed) {
+            throw new TransactionNotFoundException(id);
+        }
     }
 
     // ===== UPDATE =====
     public void update(Long id, Transaction updated) {
+
+        TransactionValidator.validate(updated);
 
         Transaction existing = transactions.stream()
                 .filter(t -> t.getId().equals(id))

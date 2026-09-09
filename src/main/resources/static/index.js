@@ -3,6 +3,32 @@ const STATISTICS_API = "/api/statistics";
 
 let categoryChart;
 
+function showNotification(message, type = "info") {
+
+    const container =
+        document.getElementById("notifications");
+
+    const notification =
+        document.createElement("div");
+
+    notification.className =
+        `notification ${type}`;
+
+    notification.innerText = message;
+
+    container.appendChild(notification);
+
+    setTimeout(() => {
+
+        notification.style.animation =
+            "notificationOut 0.3s ease";
+
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+
+    }, 3000);
+}
 
 // ========================================
 // INITIALIZATION
@@ -551,7 +577,10 @@ async function addTransaction() {
 
     if (!title) {
 
-        alert("Enter transaction title.");
+        showNotification(
+            "Please enter transaction title.",
+            "warning"
+        );
 
         return;
     }
@@ -559,49 +588,79 @@ async function addTransaction() {
 
     if (!amount || amount <= 0) {
 
-        alert("Enter a valid amount.");
+        showNotification(
+            "Please enter a valid amount.",
+            "warning"
+        );
 
         return;
     }
 
 
-    await fetch(API, {
+    try {
 
-        method: "POST",
+        const response =
+            await fetch(API, {
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+                method: "POST",
 
-        body: JSON.stringify({
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-            title,
+                body: JSON.stringify({
 
-            amount,
+                    title,
+                    amount,
+                    type,
+                    category,
+                    date: getLocalDate()
 
-            type,
+                })
 
-            category,
-
-            date:
-                new Date()
-                    .toISOString()
-                    .split("T")[0]
-
-        })
-
-    });
+            });
 
 
-    document.getElementById("title")
-        .value = "";
+        if (!response.ok) {
 
-    document.getElementById("amount")
-        .value = "";
+            const error =
+                await response.json();
+
+            showNotification(
+                error.error || "Failed to add transaction.",
+                "error"
+            );
+
+            return;
+        }
 
 
-    await loadDashboard();
+        document.getElementById("title")
+            .value = "";
+
+        document.getElementById("amount")
+            .value = "";
+
+
+        showNotification(
+            "Transaction added successfully!",
+            "success"
+        );
+
+
+        await loadDashboard();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showNotification(
+            "Server error. Please try again.",
+            "error"
+        );
+    }
 }
+
 
 
 // ========================================
@@ -610,15 +669,51 @@ async function addTransaction() {
 
 async function deleteTransaction(id) {
 
-    await fetch(
-        `${API}/${id}`,
-        {
-            method: "DELETE"
-        }
-    );
+    try {
 
-    await loadDashboard();
+        const response =
+            await fetch(
+                `${API}/${id}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+        if (!response.ok) {
+
+            const error =
+                await response.json();
+
+            showNotification(
+                error.error ||
+                "Failed to delete transaction.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        showNotification(
+            "Transaction deleted successfully!",
+            "success"
+        );
+
+
+        await loadDashboard();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showNotification(
+            "Server error. Please try again.",
+            "error"
+        );
+    }
 }
+
 
 
 // ========================================
@@ -631,6 +726,12 @@ async function editTransaction(id) {
         prompt("New title");
 
     if (!title) {
+
+        showNotification(
+            "Title cannot be empty.",
+            "warning"
+        );
+
         return;
     }
 
@@ -641,6 +742,12 @@ async function editTransaction(id) {
         );
 
     if (!amount || amount <= 0) {
+
+        showNotification(
+            "Please enter a valid amount.",
+            "warning"
+        );
+
         return;
     }
 
@@ -657,35 +764,67 @@ async function editTransaction(id) {
         );
 
 
-    await fetch(
-        `${API}/${id}`,
-        {
+    try {
 
-            method: "PUT",
+        const response =
+            await fetch(
+                `${API}/${id}`,
+                {
 
-            headers: {
-                "Content-Type":
-                    "application/json"
-            },
+                    method: "PUT",
 
-            body: JSON.stringify({
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                title,
+                    body: JSON.stringify({
 
-                amount,
+                        title,
+                        amount,
+                        type,
+                        category
 
-                type,
+                    })
 
-                category
+                }
+            );
 
-            })
 
+        if (!response.ok) {
+
+            const error =
+                await response.json();
+
+            showNotification(
+                error.error ||
+                "Failed to update transaction.",
+                "error"
+            );
+
+            return;
         }
-    );
 
 
-    await loadDashboard();
+        showNotification(
+            "Transaction updated successfully!",
+            "success"
+        );
+
+
+        await loadDashboard();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showNotification(
+            "Server error. Please try again.",
+            "error"
+        );
+    }
 }
+
 
 
 // ========================================

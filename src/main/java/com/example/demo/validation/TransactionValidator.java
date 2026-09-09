@@ -8,6 +8,12 @@ public class TransactionValidator {
 
     public static void validate(Transaction t) {
 
+        if (t == null) {
+            throw new IllegalArgumentException(
+                    "Transaction cannot be null"
+            );
+        }
+
         if (t.getTitle() == null ||
                 t.getTitle().isBlank()) {
 
@@ -16,7 +22,8 @@ public class TransactionValidator {
             );
         }
 
-        if (t.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (t.getAmount() == null ||
+                t.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
 
             throw new IllegalArgumentException(
                     "Amount must be greater than 0"
