@@ -5,38 +5,18 @@ let categoryChart;
 let currentTransactions = [];
 let deletingTransactionId = null;
 
-function showNotification(message, type = "info") {
-
-    const container =
-        document.getElementById("notifications");
-
-    const notification =
-        document.createElement("div");
-
-    notification.className =
-        `notification ${type}`;
-
-    notification.innerText = message;
-
-    container.appendChild(notification);
-
-    setTimeout(() => {
-
-        notification.style.animation =
-            "notificationOut 0.3s ease";
-
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-
-    }, 3000);
-}
-
 // ========================================
 // INITIALIZATION
 // ========================================
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+
+    // Bounces to login.html if there is no active session.
+    const user = await requireAuth();
+
+    if (!user) {
+        return;
+    }
 
     const monthInput =
         document.getElementById("month");
@@ -91,6 +71,28 @@ function getSelectedMonthRange() {
 
 
 // ========================================
+// FETCH HELPER
+// ========================================
+
+// Wraps fetch so an expired/invalid session bounces straight back to the login page
+// instead of the dashboard silently showing empty or broken data.
+async function apiFetch(url, options = {}) {
+
+    const response = await fetch(url, {
+        ...options,
+        credentials: "same-origin"
+    });
+
+    if (response.status === 401) {
+        window.location.href = "login.html";
+        throw new Error("Not authenticated");
+    }
+
+    return response;
+}
+
+
+// ========================================
 // DASHBOARD
 // ========================================
 
@@ -106,7 +108,7 @@ async function loadDashboard() {
     try {
 
         const response =
-            await fetch(
+            await apiFetch(
                 `${STATISTICS_API}/dashboard?` +
                 `from=${range.from}&to=${range.to}`
             );
@@ -479,7 +481,7 @@ function updateInsights(data) {
 async function loadTransactions() {
 
     const response =
-        await fetch(API);
+        await apiFetch(API);
 
     const data =
         await response.json();
@@ -620,7 +622,7 @@ async function addTransaction() {
     try {
 
         const response =
-            await fetch(API, {
+            await apiFetch(API, {
 
                 method: "POST",
 
@@ -733,7 +735,7 @@ async function confirmDeleteTransaction() {
     try {
 
         const response =
-            await fetch(
+            await apiFetch(
                 `${API}/${deletingTransactionId}`,
                 {
                     method: "DELETE"
@@ -890,7 +892,7 @@ async function saveEditedTransaction() {
     try {
 
         const response =
-            await fetch(
+            await apiFetch(
                 `${API}/${editingTransactionId}`,
                 {
 

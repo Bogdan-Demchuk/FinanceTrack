@@ -207,16 +207,24 @@
             <p>Personal Finance Dashboard</p>
         </div>
 
-        <div class="period-selector">
+        <div class="header-right">
 
-            <label for="month">
-                Month
-            </label>
+            <div class="period-selector">
 
-            <input
-                    type="month"
-                    id="month"
-            >
+                <label for="month">
+                    Month
+                </label>
+
+                <input
+                        type="month"
+                        id="month"
+                >
+
+            </div>
+
+            <button id="logoutButton" class="logout-button" onclick="logout()">
+                Log out
+            </button>
 
         </div>
 
@@ -456,6 +464,7 @@
 
 </div>
 
+<script src="auth.js"></script>
 <script src="index.js"></script>
 
 </body>

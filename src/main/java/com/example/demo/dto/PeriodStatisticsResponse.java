@@ -17,10 +17,8 @@ public class PeriodStatisticsResponse {
         this.income = income;
         this.expense = expense;
 
-        // Сколько денег осталось
         this.savings = income.subtract(expense);
 
-        // Какой процент дохода удалось сохранить
         if (income.compareTo(BigDecimal.ZERO) > 0) {
 
             this.savingsRate = savings

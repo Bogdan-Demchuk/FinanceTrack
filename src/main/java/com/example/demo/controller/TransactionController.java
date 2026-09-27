@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.Category;
 import com.example.demo.model.Transaction;
 import com.example.demo.model.TransactionType;
+import com.example.demo.security.SecurityUtils;
 import com.example.demo.service.TransactionService;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,45 +20,46 @@ public class TransactionController {
     public TransactionController(TransactionService service) {
         this.service = service;
     }
-    @GetMapping("/user/{userId}")
-    public List<Transaction> getByUser(@PathVariable Long userId) {
-        return service.getByUser(userId);
-    }
+
+    // Every endpoint below is scoped to SecurityUtils.getCurrentUserId() — the id of
+    // whoever is logged in for this request — never to an id supplied by the client.
+    // This is what stops user A from ever seeing or editing user B's transactions.
+
     @GetMapping
     public List<Transaction> getAll() {
-        return service.getAll();
+        return service.getAllForUser(SecurityUtils.getCurrentUserId());
     }
 
     @PostMapping
-    public void add(@RequestBody Transaction t) {
-        service.add(t);
+    public Transaction add(@RequestBody Transaction t) {
+        return service.add(SecurityUtils.getCurrentUserId(), t);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        service.delete(id);
+        service.delete(SecurityUtils.getCurrentUserId(), id);
     }
 
     @PutMapping("/{id}")
     public void update(@PathVariable Long id,
                        @RequestBody Transaction t) {
 
-        service.update(id, t);
+        service.update(SecurityUtils.getCurrentUserId(), id, t);
     }
 
     @GetMapping("/income")
     public BigDecimal income() {
-        return service.getIncome();
+        return service.getIncome(SecurityUtils.getCurrentUserId());
     }
 
     @GetMapping("/expense")
     public BigDecimal expense() {
-        return service.getExpense();
+        return service.getExpense(SecurityUtils.getCurrentUserId());
     }
 
     @GetMapping("/balance")
     public BigDecimal balance() {
-        return service.getBalance();
+        return service.getBalance(SecurityUtils.getCurrentUserId());
     }
 
     @GetMapping("/filter")
@@ -85,6 +87,7 @@ public class TransactionController {
             LocalDate to
     ) {
         return service.filter(
+                SecurityUtils.getCurrentUserId(),
                 title,
                 category,
                 type,

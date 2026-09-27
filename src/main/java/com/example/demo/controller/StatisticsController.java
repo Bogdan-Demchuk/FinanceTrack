@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.example.demo.dto.BalanceResponse;
 import com.example.demo.dto.PeriodStatisticsResponse;
+import com.example.demo.security.SecurityUtils;
 import com.example.demo.service.StatisticsService;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,10 +22,10 @@ public class StatisticsController {
         this.service = service;
     }
 
-    // Статистика за всё время
+    // Статистика за всё время (для текущего пользователя)
     @GetMapping
     public BalanceResponse getStatistics() {
-        return service.getStatistics();
+        return service.getStatistics(SecurityUtils.getCurrentUserId());
     }
 
     // Статистика за выбранный период
@@ -33,8 +34,9 @@ public class StatisticsController {
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to
     ) {
-        return service.getPeriodStatistics(from, to);
+        return service.getPeriodStatistics(SecurityUtils.getCurrentUserId(), from, to);
     }
+
     @GetMapping("/period/categories")
     public List<CategoryStatisticsResponse> getCategoryStatistics(
 
@@ -45,14 +47,15 @@ public class StatisticsController {
             LocalDate to
 
     ) {
-        return service.getCategoryStatistics(from, to);
+        return service.getCategoryStatistics(SecurityUtils.getCurrentUserId(), from, to);
     }
+
     @GetMapping("/dashboard")
     public DashboardResponse getDashboard(
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to
     ) {
-        return service.getDashboard(from, to);
+        return service.getDashboard(SecurityUtils.getCurrentUserId(), from, to);
     }
 
 

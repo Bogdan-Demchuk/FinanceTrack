@@ -4,282 +4,69 @@ import com.example.demo.exception.TransactionNotFoundException;
 import com.example.demo.model.Category;
 import com.example.demo.model.Transaction;
 import com.example.demo.model.TransactionType;
+import com.example.demo.repository.TransactionRepository;
 import com.example.demo.validation.TransactionValidator;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Every public method here takes the current user's id and every query is filtered by it.
+ * Controllers must always pass SecurityUtils.getCurrentUserId() — never a client-supplied id —
+ * so users can only ever see or modify their own data.
+ */
 @Service
 public class TransactionService {
 
-    private final List<Transaction> transactions = new ArrayList<>();
-    private long idCounter = 1;
+    private final TransactionRepository repository;
 
-    public TransactionService() {
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Salary",
-                        new BigDecimal("2500"),
-                        TransactionType.INCOME,
-                        Category.WORK,
-                        LocalDate.now().minusDays(25),
-                        1L
-                )
-        );
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Freelance",
-                        new BigDecimal("600"),
-                        TransactionType.INCOME,
-                        Category.WORK,
-                        LocalDate.now().minusDays(15),
-                        1L
-                )
-        );
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Bonus",
-                        new BigDecimal("300"),
-                        TransactionType.INCOME,
-                        Category.WORK,
-                        LocalDate.now().minusDays(5),
-                        1L
-                )
-        );
-
-
-        // =========================
-        // FOOD
-        // =========================
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Supermarket",
-                        new BigDecimal("180"),
-                        TransactionType.EXPENSE,
-                        Category.FOOD,
-                        LocalDate.now().minusDays(22),
-                        1L
-                )
-        );
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Coffee",
-                        new BigDecimal("45"),
-                        TransactionType.EXPENSE,
-                        Category.FOOD,
-                        LocalDate.now().minusDays(18),
-                        1L
-                )
-        );
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Restaurant",
-                        new BigDecimal("120"),
-                        TransactionType.EXPENSE,
-                        Category.FOOD,
-                        LocalDate.now().minusDays(10),
-                        1L
-                )
-        );
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Pizza",
-                        new BigDecimal("35"),
-                        TransactionType.EXPENSE,
-                        Category.FOOD,
-                        LocalDate.now().minusDays(3),
-                        1L
-                )
-        );
-
-
-        // =========================
-        // TRANSPORT
-        // =========================
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Gas",
-                        new BigDecimal("100"),
-                        TransactionType.EXPENSE,
-                        Category.TRANSPORT,
-                        LocalDate.now().minusDays(20),
-                        1L
-                )
-        );
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Taxi",
-                        new BigDecimal("40"),
-                        TransactionType.EXPENSE,
-                        Category.TRANSPORT,
-                        LocalDate.now().minusDays(8),
-                        1L
-                )
-        );
-
-
-        // =========================
-        // SHOPPING
-        // =========================
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Clothes",
-                        new BigDecimal("150"),
-                        TransactionType.EXPENSE,
-                        Category.SHOPPING,
-                        LocalDate.now().minusDays(17),
-                        1L
-                )
-        );
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Headphones",
-                        new BigDecimal("90"),
-                        TransactionType.EXPENSE,
-                        Category.SHOPPING,
-                        LocalDate.now().minusDays(6),
-                        1L
-                )
-        );
-
-
-        // =========================
-        // ENTERTAINMENT
-        // =========================
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Cinema",
-                        new BigDecimal("30"),
-                        TransactionType.EXPENSE,
-                        Category.ENTERTAINMENT,
-                        LocalDate.now().minusDays(14),
-                        1L
-                )
-        );
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Games",
-                        new BigDecimal("60"),
-                        TransactionType.EXPENSE,
-                        Category.ENTERTAINMENT,
-                        LocalDate.now().minusDays(4),
-                        1L
-                )
-        );
-
-
-        // =========================
-        // HEALTH
-        // =========================
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Pharmacy",
-                        new BigDecimal("70"),
-                        TransactionType.EXPENSE,
-                        Category.HEALTH,
-                        LocalDate.now().minusDays(12),
-                        1L
-                )
-        );
-
-
-        // =========================
-        // OTHER
-        // =========================
-
-        transactions.add(
-                new Transaction(
-                        idCounter++,
-                        "Gift",
-                        new BigDecimal("50"),
-                        TransactionType.EXPENSE,
-                        Category.OTHER,
-                        LocalDate.now().minusDays(7),
-                        1L
-                )
-        );
+    public TransactionService(TransactionRepository repository) {
+        this.repository = repository;
     }
 
+    // ===== READ =====
 
-    // ===== GET ALL =====
-    public List<Transaction> getAll() {
-        return transactions;
-    }
-
-    // ===== GET BY USER =====
-    public List<Transaction> getByUser(Long userId) {
-        return transactions.stream()
-                .filter(t -> t.getUserId() != null && t.getUserId().equals(userId))
-                .toList();
+    public List<Transaction> getAllForUser(Long userId) {
+        return repository.findByUserId(userId);
     }
 
     // ===== ADD =====
-    public void add(Transaction t) {
+
+    public Transaction add(Long userId, Transaction t) {
 
         TransactionValidator.validate(t);
 
-        t.setId(idCounter++);
+        t.setId(null);
+        t.setUserId(userId);
 
-        // если userId не пришёл — ставим дефолт (чтобы не падало)
-        if (t.getUserId() == null) {
-            t.setUserId(1L);
+        if (t.getDate() == null) {
+            t.setDate(LocalDate.now());
         }
 
-        transactions.add(t);
+        return repository.save(t);
     }
 
-    public void delete(Long id) {
+    // ===== DELETE =====
 
-        boolean removed = transactions.removeIf(
-                t -> t.getId().equals(id)
-        );
+    public void delete(Long userId, Long id) {
 
-        if (!removed) {
-            throw new TransactionNotFoundException(id);
-        }
+        Transaction existing = repository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new TransactionNotFoundException(id));
+
+        repository.delete(existing);
     }
 
     // ===== UPDATE =====
-    public void update(Long id, Transaction updated) {
+
+    public void update(Long userId, Long id, Transaction updated) {
 
         TransactionValidator.validate(updated);
 
-        Transaction existing = transactions.stream()
-                .filter(t -> t.getId().equals(id))
-                .findFirst()
+        Transaction existing = repository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new TransactionNotFoundException(id));
 
         existing.setTitle(updated.getTitle());
@@ -287,55 +74,50 @@ public class TransactionService {
         existing.setType(updated.getType());
         existing.setCategory(updated.getCategory());
         existing.setDate(updated.getDate());
+
+        repository.save(existing);
     }
 
-    // Все доходы
-    public BigDecimal getIncome() {
-        return transactions.stream()
-                .filter(t -> t.getType() == TransactionType.INCOME)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    // ===== ALL-TIME TOTALS =====
+
+    public BigDecimal getIncome(Long userId) {
+        return sum(repository.findByUserIdAndType(userId, TransactionType.INCOME));
     }
 
-    // Доходы за период
-    public BigDecimal getIncome(LocalDate from, LocalDate to) {
-        return transactions.stream()
-                .filter(t -> t.getType() == TransactionType.INCOME)
-                .filter(t -> isInPeriod(t, from, to))
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    public BigDecimal getExpense(Long userId) {
+        return sum(repository.findByUserIdAndType(userId, TransactionType.EXPENSE));
     }
 
-    // Все расходы
-    public BigDecimal getExpense() {
-        return transactions.stream()
-                .filter(t -> t.getType() == TransactionType.EXPENSE)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    public BigDecimal getBalance(Long userId) {
+        return getIncome(userId).subtract(getExpense(userId));
     }
 
-    // Расходы за период
-    public BigDecimal getExpense(LocalDate from, LocalDate to) {
-        return transactions.stream()
-                .filter(t -> t.getType() == TransactionType.EXPENSE)
-                .filter(t -> isInPeriod(t, from, to))
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    // ===== PERIOD TOTALS =====
+
+    public BigDecimal getIncome(Long userId, LocalDate from, LocalDate to) {
+        return sum(filterByPeriod(repository.findByUserIdAndType(userId, TransactionType.INCOME), from, to));
     }
 
-
-    // ===== BALANCE =====
-    public BigDecimal getBalance() {
-        return getIncome().subtract(getExpense());
+    public BigDecimal getExpense(Long userId, LocalDate from, LocalDate to) {
+        return sum(filterByPeriod(repository.findByUserIdAndType(userId, TransactionType.EXPENSE), from, to));
     }
 
-    // ===== FILTER BY CATEGORY =====
-    public List<Transaction> filterByCategory(Category category) {
-        return transactions.stream()
-                .filter(t -> t.getCategory() == category)
-                .toList();
+    // ===== EXPENSES BY CATEGORY =====
+
+    public Map<Category, BigDecimal> getExpensesByCategory(Long userId, LocalDate from, LocalDate to) {
+
+        Map<Category, BigDecimal> result = new HashMap<>();
+
+        filterByPeriod(repository.findByUserIdAndType(userId, TransactionType.EXPENSE), from, to)
+                .forEach(t -> result.merge(t.getCategory(), t.getAmount(), BigDecimal::add));
+
+        return result;
     }
+
+    // ===== FILTER =====
+
     public List<Transaction> filter(
+            Long userId,
             String title,
             Category category,
             TransactionType type,
@@ -344,81 +126,42 @@ public class TransactionService {
             LocalDate from,
             LocalDate to
     ) {
-        return transactions.stream()
+        return repository.findByUserId(userId).stream()
                 .filter(t ->
                         title == null ||
                                 title.isBlank() ||
-                                t.getTitle().toLowerCase()
-                                        .contains(title.toLowerCase())
+                                t.getTitle().toLowerCase().contains(title.toLowerCase())
                 )
-                .filter(t ->
-                        category == null ||
-                                t.getCategory() == category
-                )
-                .filter(t ->
-                        type == null ||
-                                t.getType() == type
-                )
-                .filter(t ->
-                        minAmount == null ||
-                                t.getAmount().compareTo(minAmount) >= 0
-                )
-                .filter(t ->
-                        maxAmount == null ||
-                                t.getAmount().compareTo(maxAmount) <= 0
-                )
-                .filter(t ->
-                        from == null ||
-                                !t.getDate().isBefore(from)
-                )
-                .filter(t ->
-                        to == null ||
-                                !t.getDate().isAfter(to)
-                )
+                .filter(t -> category == null || t.getCategory() == category)
+                .filter(t -> type == null || t.getType() == type)
+                .filter(t -> minAmount == null || t.getAmount().compareTo(minAmount) >= 0)
+                .filter(t -> maxAmount == null || t.getAmount().compareTo(maxAmount) <= 0)
+                .filter(t -> from == null || !t.getDate().isBefore(from))
+                .filter(t -> to == null || !t.getDate().isAfter(to))
                 .toList();
     }
-    private boolean isInPeriod(
-            Transaction transaction,
-            LocalDate from,
-            LocalDate to
-    ) {
-        if (transaction.getDate() == null) {
+
+    // ===== HELPERS =====
+
+    private List<Transaction> filterByPeriod(List<Transaction> list, LocalDate from, LocalDate to) {
+        return list.stream().filter(t -> isInPeriod(t, from, to)).toList();
+    }
+
+    private boolean isInPeriod(Transaction t, LocalDate from, LocalDate to) {
+
+        if (t.getDate() == null) {
             return false;
         }
 
-        boolean afterFrom =
-                from == null ||
-                        !transaction.getDate().isBefore(from);
-
-        boolean beforeTo =
-                to == null ||
-                        !transaction.getDate().isAfter(to);
+        boolean afterFrom = from == null || !t.getDate().isBefore(from);
+        boolean beforeTo = to == null || !t.getDate().isAfter(to);
 
         return afterFrom && beforeTo;
     }
-    // ===== EXPENSES BY CATEGORY =====
 
-    public Map<Category, BigDecimal> getExpensesByCategory(
-            LocalDate from,
-            LocalDate to
-    ) {
-        Map<Category, BigDecimal> result = new HashMap<>();
-
-        transactions.stream()
-                .filter(t -> t.getType() == TransactionType.EXPENSE)
-                .filter(t -> isInPeriod(t, from, to))
-                .forEach(t -> {
-
-                    Category category = t.getCategory();
-
-                    result.merge(
-                            category,
-                            t.getAmount(),
-                            BigDecimal::add
-                    );
-                });
-
-        return result;
+    private BigDecimal sum(List<Transaction> list) {
+        return list.stream()
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-
 }

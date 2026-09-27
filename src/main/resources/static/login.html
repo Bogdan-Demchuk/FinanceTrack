@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>FinTrack — Log in</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="notifications"></div>
+
+<div class="auth-page">
+
+    <div class="auth-card">
+
+        <h1>💰 FinTrack</h1>
+
+        <p class="auth-subtitle">
+            Log in to your account
+        </p>
+
+        <form id="loginForm" class="auth-form">
+
+            <label for="email">Email</label>
+            <input id="email" type="email" required autocomplete="email">
+
+            <label for="password">Password</label>
+            <input id="password" type="password" required autocomplete="current-password">
+
+            <button type="submit">Log in</button>
+
+        </form>
+
+        <p class="auth-switch">
+            Don't have an account? <a href="register.html">Sign up</a>
+        </p>
+
+    </div>
+
+</div>
+
+<script src="auth.js"></script>
+<script>
+
+    document.getElementById("loginForm")
+        .addEventListener("submit", async (event) => {
+
+            event.preventDefault();
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            const password =
+                document.getElementById("password").value;
+
+            try {
+
+                const ok = await login(email, password);
+
+                if (ok) {
+                    window.location.href = "index.html";
+                } else {
+                    showNotification("Invalid email or password.", "error");
+                }
+
+            } catch (error) {
+
+                console.error(error);
+
+                showNotification("Server error. Please try again.", "error");
+            }
+
+        });
+
+</script>
+
+</body>
+
+</html>

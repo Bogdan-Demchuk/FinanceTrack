@@ -26,13 +26,13 @@ public class StatisticsService {
 
     // ===== ALL TIME STATISTICS =====
 
-    public BalanceResponse getStatistics() {
+    public BalanceResponse getStatistics(Long userId) {
 
         BigDecimal income =
-                transactionService.getIncome();
+                transactionService.getIncome(userId);
 
         BigDecimal expense =
-                transactionService.getExpense();
+                transactionService.getExpense(userId);
 
         BigDecimal balance =
                 income.subtract(expense);
@@ -47,15 +47,16 @@ public class StatisticsService {
     // ===== PERIOD STATISTICS =====
 
     public PeriodStatisticsResponse getPeriodStatistics(
+            Long userId,
             LocalDate from,
             LocalDate to
     ) {
 
         BigDecimal income =
-                transactionService.getIncome(from, to);
+                transactionService.getIncome(userId, from, to);
 
         BigDecimal expense =
-                transactionService.getExpense(from, to);
+                transactionService.getExpense(userId, from, to);
 
         return new PeriodStatisticsResponse(
                 income,
@@ -65,17 +66,18 @@ public class StatisticsService {
     // ===== CATEGORY STATISTICS =====
 
     public List<CategoryStatisticsResponse> getCategoryStatistics(
+            Long userId,
             LocalDate from,
             LocalDate to
     ) {
         BigDecimal income =
-                transactionService.getIncome(from, to);
+                transactionService.getIncome(userId, from, to);
 
         BigDecimal expense =
-                transactionService.getExpense(from, to);
+                transactionService.getExpense(userId, from, to);
 
         Map<Category, BigDecimal> expensesByCategory =
-                transactionService.getExpensesByCategory(from, to);
+                transactionService.getExpensesByCategory(userId, from, to);
 
         List<CategoryStatisticsResponse> result =
                 new ArrayList<>();
@@ -117,14 +119,15 @@ public class StatisticsService {
     // ===== DASHBOARD =====
 
     public DashboardResponse getDashboard(
+            Long userId,
             LocalDate from,
             LocalDate to
     ) {
         BigDecimal income =
-                transactionService.getIncome(from, to);
+                transactionService.getIncome(userId, from, to);
 
         BigDecimal expense =
-                transactionService.getExpense(from, to);
+                transactionService.getExpense(userId, from, to);
 
         BigDecimal savings =
                 income.subtract(expense);
@@ -142,7 +145,7 @@ public class StatisticsService {
         }
 
         List<CategoryStatisticsResponse> categories =
-                getCategoryStatistics(from, to);
+                getCategoryStatistics(userId, from, to);
 
         String topExpenseCategory = null;
 
@@ -156,9 +159,9 @@ public class StatisticsService {
                     .name();
         }
 
-        // Balance оставляем общим, за всё время
+        // Balance stays all-time, scoped to this user only.
         BigDecimal balance =
-                transactionService.getBalance();
+                transactionService.getBalance(userId);
 
         return new DashboardResponse(
                 balance,

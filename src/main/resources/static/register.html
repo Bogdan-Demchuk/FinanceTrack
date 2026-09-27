@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>FinTrack — Sign up</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="notifications"></div>
+
+<div class="auth-page">
+
+    <div class="auth-card">
+
+        <h1>💰 FinTrack</h1>
+
+        <p class="auth-subtitle">
+            Create your account
+        </p>
+
+        <form id="registerForm" class="auth-form">
+
+            <label for="name">Name</label>
+            <input id="name" type="text" required autocomplete="name">
+
+            <label for="email">Email</label>
+            <input id="email" type="email" required autocomplete="email">
+
+            <label for="password">Password</label>
+            <input id="password" type="password" required minlength="8" autocomplete="new-password">
+            <small class="auth-hint">At least 8 characters.</small>
+
+            <button type="submit">Sign up</button>
+
+        </form>
+
+        <p class="auth-switch">
+            Already have an account? <a href="login.html">Log in</a>
+        </p>
+
+    </div>
+
+</div>
+
+<script src="auth.js"></script>
+<script>
+
+    document.getElementById("registerForm")
+        .addEventListener("submit", async (event) => {
+
+            event.preventDefault();
+
+            const name =
+                document.getElementById("name").value.trim();
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            const password =
+                document.getElementById("password").value;
+
+            try {
+
+                await register(name, email, password);
+
+                const loggedIn = await login(email, password);
+
+                if (loggedIn) {
+                    window.location.href = "index.html";
+                } else {
+                    window.location.href = "login.html";
+                }
+
+            } catch (error) {
+
+                console.error(error);
+
+                showNotification(error.message, "error");
+            }
+
+        });
+
+</script>
+
+</body>
+
+</html>
