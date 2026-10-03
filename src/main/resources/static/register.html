@@ -1,44 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>FinTrack — Sign up</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@500;600;700&display=swap"
+          rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 </head>
 
 <body>
 
-<div id="notifications"></div>
+<div class="aurora" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+</div>
 
-<div class="auth-page">
+<div id="notifications" aria-live="polite"></div>
 
-    <div class="auth-card">
+<main class="auth-page">
 
-        <h1>💰 FinTrack</h1>
+    <section class="card auth-card spot">
 
-        <p class="auth-subtitle">
-            Create your account
-        </p>
+        <div class="auth-brand">
+            <div class="brand-logo"><i data-lucide="wallet"></i></div>
+            <h1>Create your account</h1>
+            <p class="auth-subtitle">Start tracking your money in a minute</p>
+        </div>
 
         <form id="registerForm" class="auth-form">
 
             <label for="name">Name</label>
-            <input id="name" type="text" required autocomplete="name">
+            <div class="field">
+                <i data-lucide="user"></i>
+                <input id="name" type="text" required
+                       placeholder="Your name" autocomplete="name">
+            </div>
 
             <label for="email">Email</label>
-            <input id="email" type="email" required autocomplete="email">
+            <div class="field">
+                <i data-lucide="mail"></i>
+                <input id="email" type="email" required
+                       placeholder="you@example.com" autocomplete="email">
+            </div>
 
             <label for="password">Password</label>
-            <input id="password" type="password" required minlength="8" autocomplete="new-password">
-            <small class="auth-hint">At least 8 characters.</small>
+            <div class="field">
+                <i data-lucide="lock"></i>
+                <input id="password" type="password" required minlength="8"
+                       placeholder="At least 8 characters" autocomplete="new-password">
+                <button type="button" class="field-toggle"
+                        data-toggle-password="password" aria-label="Show password">
+                    <i data-lucide="eye"></i>
+                </button>
+            </div>
 
-            <button type="submit">Sign up</button>
+            <div class="strength" id="strength" data-level="0" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+            </div>
+            <small class="auth-hint" id="strengthText">At least 8 characters.</small>
+
+            <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                <i data-lucide="user-plus"></i>
+                <span>Sign up</span>
+            </button>
 
         </form>
 
@@ -46,12 +80,42 @@
             Already have an account? <a href="login.html">Log in</a>
         </p>
 
-    </div>
+    </section>
 
-</div>
+</main>
 
 <script src="auth.js"></script>
 <script>
+
+    // password strength meter
+    const passwordInput = document.getElementById("password");
+    const strength = document.getElementById("strength");
+    const strengthText = document.getElementById("strengthText");
+
+    passwordInput.addEventListener("input", () => {
+
+        const value = passwordInput.value;
+
+        let score = 0;
+
+        if (value.length >= 8) score++;
+        if (/[A-Z]/.test(value) && /[a-z]/.test(value)) score++;
+        if (/\d/.test(value)) score++;
+        if (/[^A-Za-z0-9]/.test(value) || value.length >= 14) score++;
+
+        if (!value) score = 0;
+
+        const labels = [
+            "At least 8 characters.",
+            "Weak password",
+            "Fair password",
+            "Good password",
+            "Strong password"
+        ];
+
+        strength.dataset.level = score;
+        strengthText.textContent = labels[score];
+    });
 
     document.getElementById("registerForm")
         .addEventListener("submit", async (event) => {
@@ -67,6 +131,10 @@
             const password =
                 document.getElementById("password").value;
 
+            const button = document.getElementById("submitBtn");
+
+            button.disabled = true;
+
             try {
 
                 await register(name, email, password);
@@ -79,12 +147,16 @@
                     window.location.href = "login.html";
                 }
 
+                return;
+
             } catch (error) {
 
                 console.error(error);
 
                 showNotification(error.message, "error");
             }
+
+            button.disabled = false;
 
         });
 
