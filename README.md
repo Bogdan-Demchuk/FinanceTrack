@@ -1,112 +1,200 @@
-# FinTrack
+# FinanceTrack
 
-Full-stack personal finance management application built with Java and Spring Boot.
+**FinanceTrack** — веб-приложение для управления личными финансами.
+С помощью приложения пользователь может добавлять доходы и расходы, просматривать баланс, фильтровать транзакции и анализировать свои финансовые данные.
 
-FinTrack helps users manage their personal finances by tracking expenses and income, organizing transactions into categories, and analyzing financial activity through a clean and simple dashboard.
-
----
-
-## Features
-
-- User authentication and authorization
-- Expense and income tracking
-- Transaction categories
-- Monthly financial statistics
-- Dashboard overview
-- Budget management
-- Responsive user interface
-- REST API architecture
+Проект разработан на **Java** с использованием **Spring Boot**. Frontend реализован с помощью HTML, CSS и JavaScript.
 
 ---
 
-## Tech Stack
+## Возможности
+
+### Авторизация и пользователи
+
+* Регистрация нового пользователя
+* Вход в аккаунт
+* Выход из аккаунта
+* Защита данных пользователей с помощью Spring Security
+* Пароли хранятся в зашифрованном виде с использованием BCrypt
+
+### Транзакции
+
+* Добавление доходов и расходов
+* Редактирование транзакций
+* Удаление транзакций
+* Просмотр всех своих транзакций
+* Фильтрация по:
+
+  * названию
+  * категории
+  * типу операции
+  * сумме
+  * диапазону дат
+
+### Финансовая статистика
+
+* Общий баланс
+* Общая сумма доходов
+* Общая сумма расходов
+* Статистика за выбранный период
+* Статистика расходов по категориям
+* Информация для Dashboard
+* Расчёт сбережений и процента сбережений
+
+### Интерфейс
+
+* Dashboard с основной финансовой информацией
+* Список транзакций
+* Форма добавления транзакции
+* Окна редактирования и удаления
+* Выбор месяца для просмотра статистики
+* График расходов по категориям
+* Financial Insights
+
+---
+
+## Технологии
 
 ### Backend
-- Java 21
-- Spring Boot
-- Spring Security
-- Hibernate / JPA
-- PostgreSQL
-- Maven
+
+* **Java 26**
+* **Spring Boot 4.0.6**
+* **Spring Web MVC**
+* **Spring Data JPA**
+* **Spring Security**
+* **Hibernate**
+* **Jakarta Validation**
+* **PostgreSQL**
+* **Gradle**
 
 ### Frontend
-- HTML5
-- CSS3
-- JavaScript
-- Thymeleaf
+
+* **HTML5**
+* **CSS3**
+* **JavaScript**
+* **Chart.js**
 
 ---
 
-## Project Structure
+## Структура проекта
 
 ```text
-fintrack/
+FinanceTrack/
 │
 ├── src/
 │   ├── main/
 │   │   ├── java/
-│   │   ├── resources/
-│   │   │   ├── templates/
-│   │   │   ├── static/
-│   │   │   └── application.properties
+│   │   │   └── com/example/demo/
+│   │   │       ├── controller/
+│   │   │       ├── dto/
+│   │   │       ├── exception/
+│   │   │       ├── model/
+│   │   │       ├── repository/
+│   │   │       ├── security/
+│   │   │       ├── service/
+│   │   │       └── validation/
+│   │   │
+│   │   └── resources/
+│   │       ├── static/
+│   │       │   ├── index.html
+│   │       │   ├── login.html
+│   │       │   ├── register.html
+│   │       │   ├── index.js
+│   │       │   ├── auth.js
+│   │       │   └── style.css
+│   │       │
+│   │       └── application.properties
 │   │
 │   └── test/
 │
-├── pom.xml
-├── README.md
-└── .gitignore
+├── gradle/
+├── build.gradle
+├── settings.gradle
+├── gradlew
+├── gradlew.bat
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## Installation
+## Database
 
-### Clone Repository
+Проект использует **PostgreSQL**.
 
-```bash
-git clone https://github.com/YOUR_USERNAME/fintrack.git
-
-cd fintrack
-```
-
----
-
-## Configure Database
-
-Create PostgreSQL database:
+Перед запуском приложения необходимо создать базу данных:
 
 ```sql
 CREATE DATABASE fintrack;
 ```
 
----
+По умолчанию приложение использует:
 
-## Configure application.properties
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/fintrack
-spring.datasource.username=postgres
-spring.datasource.password=your_password
-
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
+```text
+Host: localhost
+Port: 5432
+Database: fintrack
+Username: postgres
+Password: postgres
 ```
 
----
+При необходимости данные подключения можно изменить через переменные окружения:
 
-## Run Application
+```text
+DB_USERNAME
+DB_PASSWORD
+```
+
+Например:
 
 ```bash
-./mvnw spring-boot:run
+DB_USERNAME=postgres
+DB_PASSWORD=your_password
 ```
 
-or
+Hibernate автоматически создаёт и обновляет необходимые таблицы при запуске приложения.
+
+---
+
+## Запуск проекта
+
+### 1. Клонирование репозитория
 
 ```bash
-mvn spring-boot:run
+git clone https://github.com/Bogdan-Demchuk/FinanceTrack.git
 ```
 
-Application will start on:
+Перейдите в папку проекта:
+
+```bash
+cd FinanceTrack
+```
+
+### 2. Настройка PostgreSQL
+
+Создайте базу данных:
+
+```sql
+CREATE DATABASE fintrack;
+```
+
+Убедитесь, что PostgreSQL запущен.
+
+### 3. Запуск через Gradle
+
+Для Windows:
+
+```bash
+gradlew.bat bootRun
+```
+
+Для Linux/macOS:
+
+```bash
+./gradlew bootRun
+```
+
+После запуска приложение будет доступно по адресу:
 
 ```text
 http://localhost:8080
@@ -114,83 +202,123 @@ http://localhost:8080
 
 ---
 
-## Main Features
+## API
+
+Основные API endpoints проекта:
 
 ### Authentication
-- User registration
-- User login
-- Secure password encryption
+
+```http
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/logout
+GET  /api/auth/me
+```
 
 ### Transactions
-- Add income and expenses
-- Edit transactions
-- Delete transactions
-- Filter transactions
 
-### Categories
-- Create categories
-- Organize transactions
+```http
+GET    /api/transactions
+POST   /api/transactions
+PUT    /api/transactions/{id}
+DELETE /api/transactions/{id}
+```
 
-### Dashboard
-- Total balance
-- Monthly expenses
-- Monthly income
-- Financial overview
+### Transaction statistics
+
+```http
+GET /api/transactions/income
+GET /api/transactions/expense
+GET /api/transactions/balance
+GET /api/transactions/filter
+```
+
+### Statistics
+
+```http
+GET /api/statistics
+GET /api/statistics/period
+GET /api/statistics/period/categories
+GET /api/statistics/dashboard
+```
 
 ---
 
-## REST API Endpoints
+## Transaction Categories
 
-### Authentication
+В приложении доступны следующие категории:
 
-```http
-POST /auth/register
-POST /auth/login
+```text
+FOOD
+TRANSPORT
+ENTERTAINMENT
+WORK
+HEALTH
+SHOPPING
+OTHER
 ```
 
-### Transactions
+Тип транзакции может быть:
 
-```http
-GET    /transactions
-POST   /transactions
-PUT    /transactions/{id}
-DELETE /transactions/{id}
+```text
+INCOME
+EXPENSE
 ```
 
-### Categories
+---
 
-```http
-GET    /categories
-POST   /categories
-PUT    /categories/{id}
-DELETE /categories/{id}
-```
+## Security
+
+Для авторизации используется **Spring Security**.
+
+Каждая транзакция связана с конкретным пользователем. API получает ID текущего пользователя из Security Context, поэтому пользователь может работать только со своими финансовыми данными.
+
+Пароли пользователей не хранятся в открытом виде — используется **BCryptPasswordEncoder**.
+
+---
+
+## Dashboard
+
+Главная страница приложения содержит:
+
+* Balance
+* Income
+* Expenses
+* Savings
+* Savings Rate
+* Spending by Category
+* Financial Insights
+* Список транзакций
+* Форму добавления транзакции
+
+Для визуализации статистики используется **Chart.js**.
 
 ---
 
 ## Future Improvements
 
-- Budget notifications
-- Charts and analytics
-- Recurring payments
-- Export to PDF/CSV
-- Multi-currency support
-- Mobile version
+В дальнейшем проект можно расширить следующими возможностями:
 
----
-
-## Screenshots
-
-Coming soon...
-
----
-
-## License
-
-This project is licensed under the MIT License.
+* Более подробные графики и аналитика
+* Планирование бюджета
+* Повторяющиеся платежи
+* Экспорт транзакций в CSV или PDF
+* Дополнительные валюты
+* Расширенная система категорий
+* Улучшение мобильной версии
+* Docker для запуска приложения и PostgreSQL
 
 ---
 
 ## Author
 
-Developed by Bohdan Demchuk
+**Bohdan Demchuk**
+
+GitHub:
+https://github.com/Bogdan-Demchuk
+
+---
+
+## License
+
+This project is created for educational and personal development purposes.
