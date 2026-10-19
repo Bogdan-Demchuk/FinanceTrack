@@ -64,7 +64,7 @@
 * **Spring Security**
 * **Hibernate**
 * **Jakarta Validation**
-* **PostgreSQL**
+* **MariaDB**
 * **Gradle**
 
 ### Frontend
