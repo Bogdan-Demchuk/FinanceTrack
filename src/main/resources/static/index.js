@@ -349,6 +349,7 @@ async function loadDashboard() {
         renderTransactions();
 
         icons();
+        loadPet();
 
     } catch (error) {
 

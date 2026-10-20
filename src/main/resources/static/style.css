@@ -1717,3 +1717,128 @@ svg.lucide {
         border-radius: 26px;
     }
 }
+
+/* ============================================
+   FINANCIAL PET
+============================================ */
+
+.pet {
+    position: fixed;
+    z-index: 900;   /* above the page, below modals (10000) and toasts (20000) */
+}
+
+.pet-body {
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    transition: width 0.4s ease;
+    filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.35));
+}
+
+.pet.dragging .pet-body {
+    cursor: grabbing;
+}
+
+.pet-body svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.pet-panel {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    right: 0;
+    width: 260px;
+    max-height: min(70vh, 420px);
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--surface-solid);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+}
+
+.pet-panel.to-right {
+    right: auto;
+    left: 0;
+}
+
+.pet-panel.below {
+    bottom: auto;
+    top: calc(100% + 10px);
+}
+
+.pet-panel-head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 4px;
+}
+
+.pet-panel-head span {
+    font-size: 12.5px;
+    color: var(--muted);
+}
+
+.pet-slot-title {
+    margin: 12px 0 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--faint);
+}
+
+.pet-items {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.pet-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.pet-item:hover {
+    border-color: var(--border);
+}
+
+.pet-item.active {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.pet-item.locked {
+    color: var(--faint);
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pet-item svg {
+    width: 14px;
+    height: 14px;
+}
+
+.pet-item small {
+    width: 100%;
+    font-size: 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pet-body {
+        transition: none;
+    }
+}

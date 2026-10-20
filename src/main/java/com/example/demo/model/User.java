@@ -25,6 +25,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    private String petClothing;
+
+    private String petHat;
+
     public User() {
     }
 
@@ -64,5 +68,21 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPetClothing() {
+        return petClothing;
+    }
+
+    public void setPetClothing(String petClothing) {
+        this.petClothing = petClothing;
+    }
+
+    public String getPetHat() {
+        return petHat;
+    }
+
+    public void setPetHat(String petHat) {
+        this.petHat = petHat;
     }
 }
