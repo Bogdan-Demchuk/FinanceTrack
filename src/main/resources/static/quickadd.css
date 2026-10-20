@@ -1,0 +1,115 @@
+/* ============================================
+   QUICK ADD — строка "написать / сказать транзакцию" у питомца
+   Подключается после style.css и использует его цвета.
+============================================ */
+
+/* Строка стоит вплотную к питомцу, а панель с одеждой
+   сдвигаем чуть выше (или ниже), чтобы они не перекрывались. */
+.pet-panel {
+    bottom: calc(100% + 66px);
+}
+
+.pet-panel.below {
+    bottom: auto;
+    top: calc(100% + 66px);
+}
+
+.quick-add {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    right: 0;
+    width: 260px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px;
+    background: var(--surface-solid);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+}
+
+.quick-add.to-right {
+    right: auto;
+    left: 0;
+}
+
+.quick-add.below {
+    bottom: auto;
+    top: calc(100% + 10px);
+}
+
+.quick-add[hidden] {
+    display: none;
+}
+
+.quick-add input {
+    flex: 1;
+    min-width: 0;
+    height: 36px;
+    padding: 0 10px;
+    font-size: 13.5px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    outline: none;
+}
+
+.quick-add input:focus {
+    border-color: var(--primary);
+}
+
+.quick-add input::placeholder {
+    color: var(--faint);
+}
+
+.quick-btn {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    background: var(--surface-2);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.quick-btn:hover {
+    color: var(--text);
+}
+
+.quick-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* кнопка "отправить" (бумажный самолётик) */
+.quick-btn-send {
+    color: #fff;
+    background: linear-gradient(135deg, #8b7cff 0%, #5b8cff 55%, #22d3ee 100%);
+}
+
+.quick-btn-send:hover {
+    color: #fff;
+}
+
+/* микрофон, пока идёт запись */
+.quick-btn.listening {
+    color: #fff;
+    background: var(--expense);
+    animation: quick-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes quick-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0.6); }
+    50%      { box-shadow: 0 0 0 7px rgba(251, 113, 133, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quick-btn.listening {
+        animation: none;
+    }
+}
